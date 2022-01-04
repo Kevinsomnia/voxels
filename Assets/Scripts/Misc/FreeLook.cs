@@ -25,7 +25,7 @@ public class FreeLook : MonoBehaviour
         }
 
         _rotX += Input.GetAxis("Mouse X") * _mouseSensitivity;
-        _rotY -= Input.GetAxis("Mouse Y") * _mouseSensitivity;
+        _rotY += Input.GetAxis("Mouse Y") * _mouseSensitivity;
 
         Vector3 pos = _transform.position;
         Vector3 dir = _transform.TransformDirection(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
@@ -38,6 +38,6 @@ public class FreeLook : MonoBehaviour
         if (dir.sqrMagnitude > 1f)
             dir.Normalize();
 
-        _transform.SetPositionAndRotation(pos + (dir * _moveSpeed * Time.deltaTime), Quaternion.Euler(_rotY, _rotX, 0f));
+        _transform.SetPositionAndRotation(pos + (dir * _moveSpeed * Time.deltaTime), Quaternion.Euler(-_rotY, _rotX, 0f));
     }
 }
