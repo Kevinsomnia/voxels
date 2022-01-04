@@ -22,9 +22,16 @@ public class FreeLook : MonoBehaviour
         _rotY -= Input.GetAxis("Mouse Y") * _mouseSensitivity;
 
         Vector3 pos = _transform.position;
-        float inputX = Input.GetAxis("Horizontal");
-        float inputZ = Input.GetAxis("Vertical");
-        pos += _transform.TransformDirection(inputX, 0f, inputZ) * _moveSpeed * Time.deltaTime;
-        _transform.SetPositionAndRotation(pos, Quaternion.Euler(_rotY, _rotX, 0f));
+        Vector3 dir = _transform.TransformDirection(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
+
+        if (Input.GetKey(KeyCode.Space))
+            dir.y += 1.0f;
+        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+            dir.y -= 1.0f;
+
+        if (dir.sqrMagnitude > 1f)
+            dir.Normalize();
+
+        _transform.SetPositionAndRotation(pos + (dir * _moveSpeed * Time.deltaTime), Quaternion.Euler(_rotY, _rotX, 0f));
     }
 }
