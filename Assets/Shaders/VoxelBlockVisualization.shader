@@ -65,8 +65,8 @@
 
                 fixed intersectFactor = 1.0 - saturate((LinearEyeDepth(tex2Dproj(_CameraDepthTexture, i.screenPos).r) - i.screenPos.z) / _IntersectionAmount);
                 intersectFactor += 1.0;
+                finalCol.a *= intersectFactor;
 
-                // finalCol *= intersectFactor;
                 return finalCol;
             }
             ENDCG
