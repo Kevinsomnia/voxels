@@ -18,6 +18,12 @@ public class FreeLook : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetMouseButtonDown(0))
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+
         _rotX += Input.GetAxis("Mouse X") * _mouseSensitivity;
         _rotY -= Input.GetAxis("Mouse Y") * _mouseSensitivity;
 
