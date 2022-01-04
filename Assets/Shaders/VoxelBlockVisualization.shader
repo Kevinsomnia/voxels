@@ -2,14 +2,14 @@
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-        _Color ("Color", Color) = (0.5, 0.5, 0.5, 1)
+        [HDR] _Color ("Color", Color) = (0.5, 0.5, 0.5, 1)
         _IntersectionAmount ("Intersection Amount", Range(0.0, 1.0)) = 0.1
     }
 
     SubShader
     {
         Tags { "Queue"="Transparent" "RenderType"="Transparent" }
-        Blend One OneMinusSrcAlpha
+        Blend SrcAlpha OneMinusSrcAlpha
         Cull Off
         ZWrite Off
 
@@ -60,8 +60,8 @@
             fixed4 frag(v2f i) : COLOR
             {
                 fixed4 finalCol = _Color;
-                finalCol.rgb *= tex2D(_MainTex, i.uv).r;
                 finalCol.rgb *= 0.5 + (i.fresnel * 0.5);
+                finalCol.a *= tex2D(_MainTex, i.uv).r;
 
                 fixed intersectFactor = 1.0 - saturate((LinearEyeDepth(tex2Dproj(_CameraDepthTexture, i.screenPos).r) - i.screenPos.z) / _IntersectionAmount);
                 intersectFactor += 1.0;
