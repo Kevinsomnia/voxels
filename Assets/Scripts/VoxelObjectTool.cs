@@ -8,6 +8,8 @@ public class VoxelObjectTool : MonoBehaviour
     [SerializeField] private GameObject _visualizer;
 
     private Transform _transform;
+    private VoxelObject _voxelObj;
+    private VoxelBlock.Material _selectedMat;
     private float _rayDistance;
 
     private void Awake()
@@ -15,7 +17,13 @@ public class VoxelObjectTool : MonoBehaviour
         _transform = transform;
         _rayDistance = 2f;
 
-        _visualizer.transform.localScale = Vector3.one * VoxelObject.VOXEL_SIZE * VISUALIZER_SIZE_MULTIPLIER;
+        _visualizer.transform.localScale = Vector3.one * VoxelBlock.WORLD_SIZE * VISUALIZER_SIZE_MULTIPLIER;
+
+        // Initialize global voxel object instance.
+        GameObject go = new GameObject("Voxels");
+        _voxelObj = go.AddComponent<VoxelObject>();
+
+        _selectedMat = VoxelBlock.Material.Clean;
     }
 
     private void LateUpdate()
@@ -25,15 +33,17 @@ public class VoxelObjectTool : MonoBehaviour
 
         Vector3 targetPlacePos = _transform.position + (_transform.forward * _rayDistance);
         _visualizer.transform.position = GetCursorPosition(targetPlacePos);
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            Vector3Int placeLoc = VoxelObject.GetBlockLocation(targetPlacePos);
+            _voxelObj.AddBlock(placeLoc, _selectedMat);
+        }
     }
 
     private static Vector3 GetCursorPosition(Vector3 worldPos)
     {
-        worldPos /= VoxelObject.VOXEL_SIZE;
-
-        int roundedX = Mathf.RoundToInt(worldPos.x);
-        int roundedY = Mathf.RoundToInt(worldPos.y);
-        int roundedZ = Mathf.RoundToInt(worldPos.z);
-        return new Vector3(roundedX, roundedY, roundedZ) * VoxelObject.VOXEL_SIZE;
+        Vector3Int loc = VoxelObject.GetBlockLocation(worldPos);
+        return new Vector3(loc.x, loc.y, loc.z) * VoxelBlock.WORLD_SIZE;
     }
 }
