@@ -8,7 +8,8 @@ public struct VoxelBlock
     {
         Empty = 0,  // No block
         Clean,
-        Dirt
+        Dirt,
+        LENGTH  // don't touch
     }
 
     public Material material;

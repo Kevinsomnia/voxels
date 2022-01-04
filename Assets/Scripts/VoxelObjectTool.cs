@@ -5,6 +5,7 @@ public class VoxelObjectTool : MonoBehaviour
     // Hack to prevent Z-fighting
     private const float VISUALIZER_SIZE_MULTIPLIER = 0.99f;
 
+    [SerializeField] private VoxelObject _voxelObjectPrefab;
     [SerializeField] private GameObject _visualizer;
 
     private Transform _transform;
@@ -19,9 +20,8 @@ public class VoxelObjectTool : MonoBehaviour
 
         _visualizer.transform.localScale = Vector3.one * VoxelBlock.WORLD_SIZE * VISUALIZER_SIZE_MULTIPLIER;
 
-        // Initialize global voxel object instance.
-        GameObject go = new GameObject("Voxels");
-        _voxelObj = go.AddComponent<VoxelObject>();
+        if (_voxelObj == null)
+            _voxelObj = Instantiate(_voxelObjectPrefab);
 
         _selectedMat = VoxelBlock.Material.Clean;
     }

@@ -9,6 +9,8 @@ public class VoxelObject : MonoBehaviour
 
     private const int MAX_CHUNK_COUNT = MAX_OBJECT_SIZE * MAX_OBJECT_SIZE * MAX_OBJECT_SIZE;
 
+    [SerializeField] private VoxelChunk _chunkPrefab;
+
     private Dictionary<int, VoxelChunk> _chunks;
     private Transform _transform;
 
@@ -21,23 +23,25 @@ public class VoxelObject : MonoBehaviour
     public void AddBlock(Vector3Int pos, VoxelBlock.Material material)
     {
         Vector3Int chunkLoc = GetChunkLocation(pos);
+        // Ensure the chunk exists, then add the block to it.
+        VoxelChunk chunk = GetOrAllocateChunk(chunkLoc);
 
-        // Ensure the requested position is within bounds. If not, do nothing.
+        if (chunk != null)
+        {
+            // Convert to chunk local coordinate.
+            Vector3Int chunkRelativeLoc = pos - (chunkLoc * VoxelChunk.CHUNK_SIZE);
+            chunk.AddBlock(chunkRelativeLoc, material);
+        }
+    }
+
+    private VoxelChunk GetOrAllocateChunk(Vector3Int chunkLoc)
+    {
+        // Position bounds check.
         int chunkKey = GetChunkKey(chunkLoc.x, chunkLoc.y, chunkLoc.z);
 
         if (chunkKey < 0 || chunkKey >= MAX_CHUNK_COUNT)
-            return;
+            return null;
 
-        // Convert to chunk local coordinate.
-        Vector3Int chunkRelativeLoc = pos - (chunkLoc * VoxelChunk.CHUNK_SIZE);
-
-        // Ensure the chunk exists, then add the block to it.
-        VoxelChunk chunk = GetOrAllocateChunk(chunkKey);
-        chunk.AddBlock(chunkRelativeLoc, material);
-    }
-
-    private VoxelChunk GetOrAllocateChunk(int chunkKey)
-    {
         VoxelChunk result;
 
         if (_chunks.TryGetValue(chunkKey, out VoxelChunk chunk))
@@ -46,7 +50,10 @@ public class VoxelObject : MonoBehaviour
         }
         else
         {
-            result = new VoxelChunk();
+            result = Instantiate(_chunkPrefab);
+            Transform tr = result.transform;
+            tr.parent = _transform;
+            tr.localPosition = new Vector3(chunkLoc.x, chunkLoc.y, chunkLoc.z) * VoxelChunk.CHUNK_WORLD_SIZE;
             _chunks[chunkKey] = result;
         }
 
