@@ -41,14 +41,14 @@ public class VoxelObject : MonoBehaviour
     public void AddBlocks(Vector3Int start, Vector3Int end, VoxelBlock.Material material, bool updateMesh = true)
     {
         Vector3Int minBlockLoc = new Vector3Int(
-            Mathf.Clamp(Mathf.Min(start.x, end.x), 0, MAX_BLOCK_EDGE_SIZE - 1),
-            Mathf.Clamp(Mathf.Min(start.y, end.y), 0, MAX_BLOCK_EDGE_SIZE - 1),
-            Mathf.Clamp(Mathf.Min(start.z, end.z), 0, MAX_BLOCK_EDGE_SIZE - 1)
+            Mathf.Min(start.x, end.x),
+            Mathf.Min(start.y, end.y),
+            Mathf.Min(start.z, end.z)
         );
         Vector3Int maxBlockLoc = new Vector3Int(
-            Mathf.Clamp(Mathf.Max(start.x, end.x), 0, MAX_BLOCK_EDGE_SIZE - 1),
-            Mathf.Clamp(Mathf.Max(start.y, end.y), 0, MAX_BLOCK_EDGE_SIZE - 1),
-            Mathf.Clamp(Mathf.Max(start.z, end.z), 0, MAX_BLOCK_EDGE_SIZE - 1)
+            Mathf.Max(start.x, end.x),
+            Mathf.Max(start.y, end.y),
+            Mathf.Max(start.z, end.z)
         );
 
         for (int z = minBlockLoc.z; z <= maxBlockLoc.z; z++)
@@ -87,14 +87,14 @@ public class VoxelObject : MonoBehaviour
     public void RemoveBlocks(Vector3Int start, Vector3Int end, bool updateMesh = true)
     {
         Vector3Int minBlockLoc = new Vector3Int(
-            Mathf.Clamp(Mathf.Min(start.x, end.x), 0, MAX_BLOCK_EDGE_SIZE - 1),
-            Mathf.Clamp(Mathf.Min(start.y, end.y), 0, MAX_BLOCK_EDGE_SIZE - 1),
-            Mathf.Clamp(Mathf.Min(start.z, end.z), 0, MAX_BLOCK_EDGE_SIZE - 1)
+            Mathf.Min(start.x, end.x),
+            Mathf.Min(start.y, end.y),
+            Mathf.Min(start.z, end.z)
         );
         Vector3Int maxBlockLoc = new Vector3Int(
-            Mathf.Clamp(Mathf.Max(start.x, end.x), 0, MAX_BLOCK_EDGE_SIZE - 1),
-            Mathf.Clamp(Mathf.Max(start.y, end.y), 0, MAX_BLOCK_EDGE_SIZE - 1),
-            Mathf.Clamp(Mathf.Max(start.z, end.z), 0, MAX_BLOCK_EDGE_SIZE - 1)
+            Mathf.Max(start.x, end.x),
+            Mathf.Max(start.y, end.y),
+            Mathf.Max(start.z, end.z)
         );
 
         for (int z = minBlockLoc.z; z <= maxBlockLoc.z; z++)
@@ -116,6 +116,13 @@ public class VoxelObject : MonoBehaviour
 
     private void UpdateMeshes(Vector3Int startChunk, Vector3Int endChunk)
     {
+        startChunk.x = Mathf.Clamp(startChunk.x, 0, MAX_BLOCK_EDGE_SIZE - 1);
+        startChunk.y = Mathf.Clamp(startChunk.y, 0, MAX_BLOCK_EDGE_SIZE - 1);
+        startChunk.z = Mathf.Clamp(startChunk.z, 0, MAX_BLOCK_EDGE_SIZE - 1);
+        endChunk.x = Mathf.Clamp(endChunk.x, 0, MAX_BLOCK_EDGE_SIZE - 1);
+        endChunk.y = Mathf.Clamp(endChunk.y, 0, MAX_BLOCK_EDGE_SIZE - 1);
+        endChunk.z = Mathf.Clamp(endChunk.z, 0, MAX_BLOCK_EDGE_SIZE - 1);
+
         for (int z = startChunk.z; z <= endChunk.z; z++)
         {
             for (int y = startChunk.y; y <= endChunk.y; y++)
