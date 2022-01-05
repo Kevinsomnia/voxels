@@ -10,6 +10,7 @@ public class VoxelObjectTool : MonoBehaviour
 
     private Transform _transform;
     private Transform _visualizerTransform;
+    private MeshRenderer _visualizerRenderer;
     private VoxelObject _voxelObj;
     private VoxelBlock.Material _selectedMat;
     private bool _placingBlocks;
@@ -24,6 +25,8 @@ public class VoxelObjectTool : MonoBehaviour
         _rayDistance = 2f;
 
         _visualizerTransform.localScale = Vector3.one * VoxelBlock.WORLD_SIZE * VISUALIZER_SIZE_MULTIPLIER;
+        _visualizerRenderer = _visualizer.GetComponent<MeshRenderer>();
+        _visualizerRenderer.material.SetFloat("_GridScale", VoxelBlock.WORLD_SIZE);
 
         if (_voxelObj == null)
             _voxelObj = Instantiate(_voxelObjectPrefab);
