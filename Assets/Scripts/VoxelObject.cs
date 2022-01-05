@@ -34,7 +34,7 @@ public class VoxelObject : MonoBehaviour
             chunk.AddBlock(chunkRelativeLoc, material);
 
             if (updateMesh)
-                chunk.UpdateMeshForMaterial(material);
+                chunk.UpdateMesh();
         }
     }
 
@@ -64,7 +64,7 @@ public class VoxelObject : MonoBehaviour
         {
             Vector3Int minChunkLoc = GetChunkLocation(minBlockLoc);
             Vector3Int maxChunkLoc = GetChunkLocation(maxBlockLoc);
-            UpdateMeshesForMaterial(minChunkLoc, maxChunkLoc, material);
+            UpdateMeshes(minChunkLoc, maxChunkLoc);
         }
     }
 
@@ -77,12 +77,10 @@ public class VoxelObject : MonoBehaviour
         {
             // Convert to chunk local coordinate.
             Vector3Int chunkRelativeLoc = pos - (chunkLoc * VoxelChunk.CHUNK_SIZE);
-            VoxelBlock block = chunk.GetBlock(chunkRelativeLoc);
-            VoxelBlock.Material prevMaterial = block.material;
             chunk.ClearBlock(chunkRelativeLoc);
 
             if (updateMesh)
-                chunk.UpdateMeshForMaterial(prevMaterial);
+                chunk.UpdateMesh();
         }
     }
 
@@ -112,14 +110,11 @@ public class VoxelObject : MonoBehaviour
         {
             Vector3Int minChunkLoc = GetChunkLocation(minBlockLoc);
             Vector3Int maxChunkLoc = GetChunkLocation(maxBlockLoc);
-
-            // TODO: dirty flag, simplify
-            for (int i = 1; i < (int)VoxelBlock.Material.LENGTH; i++)
-                UpdateMeshesForMaterial(minChunkLoc, maxChunkLoc, (VoxelBlock.Material)i);
+            UpdateMeshes(minChunkLoc, maxChunkLoc);
         }
     }
 
-    private void UpdateMeshesForMaterial(Vector3Int startChunk, Vector3Int endChunk, VoxelBlock.Material material)
+    private void UpdateMeshes(Vector3Int startChunk, Vector3Int endChunk)
     {
         for (int z = startChunk.z; z <= endChunk.z; z++)
         {
@@ -130,7 +125,7 @@ public class VoxelObject : MonoBehaviour
                     VoxelChunk chunk = GetOrAllocateChunk(new Vector3Int(x, y, z));
 
                     if (chunk != null)
-                        chunk.UpdateMeshForMaterial(material);
+                        chunk.UpdateMesh();
                 }
             }
         }

@@ -10,6 +10,7 @@ public class VoxelChunk : MonoBehaviour
         public MeshFilter meshFilter;
         public MeshRenderer meshRenderer;
         public Mesh mesh;
+        public bool isDirty;
 
         public void Dispose()
         {
@@ -67,15 +68,25 @@ public class VoxelChunk : MonoBehaviour
         int index = GetBlockIndex(position.x, position.y, position.z);
 
         if (_blocks[index].material == VoxelBlock.Material.Empty)
+        {
             _blocks[index].material = material;
+            GetOrCreateGroupForMaterial(material);
+            int groupIndex = (int)material - 1;
+            _groups[groupIndex].isDirty = true;
+        }
     }
 
     public void SetBlock(Vector3Int position, VoxelBlock.Material material)
     {
-        int index = GetBlockIndex(position.x, position.y, position.z);
-        _blocks[index].material = material;
-        GetOrCreateGroupForMaterial(material);
-        UpdateMeshForMaterial(material);
+        int blockIndex = GetBlockIndex(position.x, position.y, position.z);
+
+        if (_blocks[blockIndex].material != material)
+        {
+            _blocks[blockIndex].material = material;
+            GetOrCreateGroupForMaterial(material);
+            int groupIndex = (int)material - 1;
+            _groups[groupIndex].isDirty = true;
+        }
     }
 
     public void ClearBlock(Vector3Int position)
@@ -86,7 +97,9 @@ public class VoxelChunk : MonoBehaviour
         if (prevMat != VoxelBlock.Material.Empty)
         {
             _blocks[index].material = VoxelBlock.Material.Empty;
-            UpdateMeshForMaterial(prevMat);
+            GetOrCreateGroupForMaterial(prevMat);
+            int groupIndex = (int)prevMat - 1;
+            _groups[groupIndex].isDirty = true;
         }
     }
 
@@ -115,13 +128,19 @@ public class VoxelChunk : MonoBehaviour
         return group;
     }
 
-    public void ForceUpdateMesh()
+    public void UpdateMesh()
     {
         for (int i = 0; i < _groups.Length; i++)
-            UpdateMeshForMaterial((VoxelBlock.Material)(i + 1));
+        {
+            if (_groups[i] != null && _groups[i].isDirty)
+            {
+                _groups[i].isDirty = false;
+                UpdateMeshForMaterial((VoxelBlock.Material)(i + 1));
+            }
+        }
     }
 
-    public void UpdateMeshForMaterial(VoxelBlock.Material material)
+    private void UpdateMeshForMaterial(VoxelBlock.Material material)
     {
         GetOrCreateGroupForMaterial(material);
         int groupIndex = (int)material - 1;
