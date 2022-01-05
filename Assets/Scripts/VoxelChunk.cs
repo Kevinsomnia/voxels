@@ -62,11 +62,7 @@ public class VoxelChunk : MonoBehaviour
         int index = GetBlockIndex(position.x, position.y, position.z);
 
         if (_blocks[index].material == VoxelBlock.Material.Empty)
-        {
             _blocks[index].material = material;
-            GetOrCreateGroupForMaterial(material);
-            UpdateMeshForMaterial(material);
-        }
     }
 
     public void SetBlock(Vector3Int position, VoxelBlock.Material material)
@@ -114,7 +110,7 @@ public class VoxelChunk : MonoBehaviour
         return group;
     }
 
-    private void ForceUpdateMesh()
+    public void ForceUpdateMesh()
     {
         for (int i = 0; i < _groups.Length; i++)
         {
@@ -122,8 +118,9 @@ public class VoxelChunk : MonoBehaviour
         }
     }
 
-    private void UpdateMeshForMaterial(VoxelBlock.Material material)
+    public void UpdateMeshForMaterial(VoxelBlock.Material material)
     {
+        GetOrCreateGroupForMaterial(material);
         int groupIndex = (int)material - 1;
         BlockGroup group = _groups[groupIndex];
 

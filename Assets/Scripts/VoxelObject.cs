@@ -6,6 +6,8 @@ public class VoxelObject : MonoBehaviour
 {
     // Max number of chunks in a single dimension of the voxel object.
     public const int MAX_OBJECT_SIZE = 1024;
+    // Max number of blocks in a single dimension of the voxel object.
+    public const int MAX_BLOCK_EDGE_SIZE = MAX_OBJECT_SIZE * VoxelChunk.CHUNK_SIZE;
 
     private const int MAX_CHUNK_COUNT = MAX_OBJECT_SIZE * MAX_OBJECT_SIZE * MAX_OBJECT_SIZE;
 
@@ -20,7 +22,7 @@ public class VoxelObject : MonoBehaviour
         _chunks = new Dictionary<int, VoxelChunk>();
     }
 
-    public void AddBlock(Vector3Int pos, VoxelBlock.Material material)
+    public void AddBlock(Vector3Int pos, VoxelBlock.Material material, bool updateMesh = true)
     {
         Vector3Int chunkLoc = GetChunkLocation(pos);
         // Ensure the chunk exists, then add the block to it.
@@ -34,22 +36,43 @@ public class VoxelObject : MonoBehaviour
         }
     }
 
-    public void AddBlocks(Vector3Int start, Vector3Int end, VoxelBlock.Material material)
+    public void AddBlocks(Vector3Int start, Vector3Int end, VoxelBlock.Material material, bool updateMesh = true)
     {
-        int minX = Mathf.Min(start.x, end.x);
-        int maxX = Mathf.Max(start.x, end.x);
-        int minY = Mathf.Min(start.y, end.y);
-        int maxY = Mathf.Max(start.y, end.y);
-        int minZ = Mathf.Min(start.z, end.z);
-        int maxZ = Mathf.Max(start.z, end.z);
+        Vector3Int minBlockLoc = new Vector3Int(
+            Mathf.Clamp(Mathf.Min(start.x, end.x), 0, MAX_BLOCK_EDGE_SIZE - 1),
+            Mathf.Clamp(Mathf.Min(start.y, end.y), 0, MAX_BLOCK_EDGE_SIZE - 1),
+            Mathf.Clamp(Mathf.Min(start.z, end.z), 0, MAX_BLOCK_EDGE_SIZE - 1)
+        );
+        Vector3Int maxBlockLoc = new Vector3Int(
+            Mathf.Clamp(Mathf.Max(start.x, end.x), 0, MAX_BLOCK_EDGE_SIZE - 1),
+            Mathf.Clamp(Mathf.Max(start.y, end.y), 0, MAX_BLOCK_EDGE_SIZE - 1),
+            Mathf.Clamp(Mathf.Max(start.z, end.z), 0, MAX_BLOCK_EDGE_SIZE - 1)
+        );
 
-        for (int z = minZ; z <= maxZ; z++)
+        for (int z = minBlockLoc.z; z <= maxBlockLoc.z; z++)
         {
-            for (int y = minY; y <= maxY; y++)
+            for (int y = minBlockLoc.y; y <= maxBlockLoc.y; y++)
             {
-                for (int x = minX; x <= maxX; x++)
+                for (int x = minBlockLoc.x; x <= maxBlockLoc.x; x++)
+                    AddBlock(new Vector3Int(x, y, z), material, updateMesh: false);
+            }
+        }
+
+        if (updateMesh)
+        {
+            Vector3Int minChunkLoc = GetChunkLocation(minBlockLoc);
+            Vector3Int maxChunkLoc = GetChunkLocation(maxBlockLoc);
+
+            for (int z = minChunkLoc.z; z <= maxChunkLoc.z; z++)
+            {
+                for (int y = minChunkLoc.y; y <= maxChunkLoc.y; y++)
                 {
-                    AddBlock(new Vector3Int(x, y, z), material);
+                    for (int x = minChunkLoc.x; x <= maxChunkLoc.x; x++)
+                    {
+                        VoxelChunk chunk = GetOrAllocateChunk(new Vector3Int(x, y, z));
+                        // Don't need to null-check since we already clamped the block/chunk location.
+                        chunk.UpdateMeshForMaterial(material);
+                    }
                 }
             }
         }
