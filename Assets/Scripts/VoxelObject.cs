@@ -34,6 +34,55 @@ public class VoxelObject : MonoBehaviour
         }
     }
 
+    public void AddBlocks(Vector3Int start, Vector3Int end, VoxelBlock.Material material)
+    {
+        int minX, minY, minZ, maxX, maxY, maxZ;
+
+        if (start.x > end.x)
+        {
+            minX = end.x;
+            maxX = start.x;
+        }
+        else
+        {
+            minX = start.x;
+            maxX = end.x;
+        }
+
+        if (start.y > end.y)
+        {
+            minY = end.y;
+            maxY = start.y;
+        }
+        else
+        {
+            minY = start.y;
+            maxY = end.y;
+        }
+
+        if (start.z > end.z)
+        {
+            minZ = end.z;
+            maxZ = start.z;
+        }
+        else
+        {
+            minZ = start.z;
+            maxZ = end.z;
+        }
+
+        for (int z = minZ; z <= maxZ; z++)
+        {
+            for (int y = minY; y <= maxY; y++)
+            {
+                for (int x = minX; x <= maxX; x++)
+                {
+                    AddBlock(new Vector3Int(x, y, z), material);
+                }
+            }
+        }
+    }
+
     private VoxelChunk GetOrAllocateChunk(Vector3Int chunkLoc)
     {
         // Position bounds check.
