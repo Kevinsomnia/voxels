@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 public class VoxelChunk
 {
     // Number of blocks in a single dimension of a chunk
-    public const int CHUNK_SIZE = 32;
+    public const int CHUNK_SIZE = 16;
 
     private const int BLOCK_COUNT = CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE;
 
