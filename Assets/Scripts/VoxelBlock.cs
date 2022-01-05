@@ -2,7 +2,7 @@ using UnityEngine;
 
 public struct VoxelBlock
 {
-    public const float WORLD_SIZE = 0.25f;
+    public const float WORLD_SIZE = 0.2f;
 
     public enum Material : byte
     {

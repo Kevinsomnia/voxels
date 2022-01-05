@@ -19,7 +19,7 @@ public class VoxelChunk : MonoBehaviour
     }
 
     // Number of blocks in a single dimension of a chunk
-    public const int CHUNK_SIZE = 16;
+    public const int CHUNK_SIZE = 24;
     public const float CHUNK_WORLD_SIZE = CHUNK_SIZE * VoxelBlock.WORLD_SIZE;
 
     private const int MAX_BLOCK_COUNT = CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE;
