@@ -36,40 +36,12 @@ public class VoxelObject : MonoBehaviour
 
     public void AddBlocks(Vector3Int start, Vector3Int end, VoxelBlock.Material material)
     {
-        int minX, minY, minZ, maxX, maxY, maxZ;
-
-        if (start.x > end.x)
-        {
-            minX = end.x;
-            maxX = start.x;
-        }
-        else
-        {
-            minX = start.x;
-            maxX = end.x;
-        }
-
-        if (start.y > end.y)
-        {
-            minY = end.y;
-            maxY = start.y;
-        }
-        else
-        {
-            minY = start.y;
-            maxY = end.y;
-        }
-
-        if (start.z > end.z)
-        {
-            minZ = end.z;
-            maxZ = start.z;
-        }
-        else
-        {
-            minZ = start.z;
-            maxZ = end.z;
-        }
+        int minX = Mathf.Min(start.x, end.x);
+        int maxX = Mathf.Max(start.x, end.x);
+        int minY = Mathf.Min(start.y, end.y);
+        int maxY = Mathf.Max(start.y, end.y);
+        int minZ = Mathf.Min(start.z, end.z);
+        int maxZ = Mathf.Max(start.z, end.z);
 
         for (int z = minZ; z <= maxZ; z++)
         {
