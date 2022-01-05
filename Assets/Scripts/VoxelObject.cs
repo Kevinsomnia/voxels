@@ -180,6 +180,7 @@ public class VoxelObject : MonoBehaviour
             Transform tr = result.transform;
             tr.parent = _transform;
             tr.localPosition = new Vector3(chunkLoc.x, chunkLoc.y, chunkLoc.z) * VoxelChunk.CHUNK_WORLD_SIZE;
+            tr.localScale = Vector3.one * VoxelBlock.WORLD_SIZE;
             _chunks[chunkKey] = result;
         }
 
