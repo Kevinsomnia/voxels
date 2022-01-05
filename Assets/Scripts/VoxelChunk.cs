@@ -147,7 +147,7 @@ public class VoxelChunk : MonoBehaviour
                 {
                     int mainBlockIndex = zIndexOffs + yIndexOffs + x;
 
-                    if (_blocks[mainBlockIndex].material != VoxelBlock.Material.Empty)
+                    if (_blocks[mainBlockIndex].material == material)
                     {
                         if (x <= 0 || _blocks[GetBlockIndex(x - 1, y, z)].material == VoxelBlock.Material.Empty)
                         {

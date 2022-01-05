@@ -6,6 +6,11 @@ public static class VoxelMeshUtility
     public const int TEXTURE_ATLAS_SIZE = 8;
     public const int MAX_MATERIAL_COUNT = TEXTURE_ATLAS_SIZE * TEXTURE_ATLAS_SIZE;
 
+    private const float UV_SCALE = 1.0f / TEXTURE_ATLAS_SIZE;
+    // Avoid sampling another tile.
+    private const float UV_INSET = 0.005f;
+    private const float UV_INSET_INVERTED = 1f - UV_INSET;
+
     public enum Face
     {
         Left = 0,
@@ -78,10 +83,13 @@ public static class VoxelMeshUtility
         normals.Add(normal);
         normals.Add(normal);
 
-        uvs.Add(new Vector2(0f, 1f));
-        uvs.Add(new Vector2(1f, 1f));
-        uvs.Add(new Vector2(0f, 0f));
-        uvs.Add(new Vector2(1f, 0f));
+        int materialIndex = (int)material - 1;
+        float uvOffsX = materialIndex;
+        float uvOffsY = materialIndex / TEXTURE_ATLAS_SIZE;
+        uvs.Add(new Vector2(UV_INSET + uvOffsX, UV_INSET_INVERTED + uvOffsY) * UV_SCALE);
+        uvs.Add(new Vector2(UV_INSET_INVERTED + uvOffsX, UV_INSET_INVERTED + uvOffsY) * UV_SCALE);
+        uvs.Add(new Vector2(UV_INSET + uvOffsX, UV_INSET + uvOffsY) * UV_SCALE);
+        uvs.Add(new Vector2(UV_INSET_INVERTED + uvOffsX, UV_INSET + uvOffsY) * UV_SCALE);
 
         // Top-right triangle
         triangles.Add(indexStart);

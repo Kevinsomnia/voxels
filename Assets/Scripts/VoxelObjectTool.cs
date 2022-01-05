@@ -47,11 +47,13 @@ public class VoxelObjectTool : MonoBehaviour
 
     private void OnGUI()
     {
-        GUILayout.Box("1. Place\n2. Delete\n3. Paint");
+        GUILayout.Box("1. Place\n2. Delete\n3. Paint\nScroll: Adjust place tool distance\nLeft/Right Arrow: Cycle block material");
+        GUILayout.Box("Selected material: " + _selectedMat);
     }
 
     private void LateUpdate()
     {
+        // Switch tools
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             SetToolType(ToolType.Place);
@@ -65,6 +67,31 @@ public class VoxelObjectTool : MonoBehaviour
             SetToolType(ToolType.Paint);
         }
 
+        // Switch material.
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            if ((int)_selectedMat <= 1)
+            {
+                _selectedMat = (VoxelBlock.Material)((int)VoxelBlock.Material.LENGTH - 1);
+            }
+            else
+            {
+                _selectedMat = (VoxelBlock.Material)((int)_selectedMat - 1);
+            }
+        }
+        else if (Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            if ((int)_selectedMat >= (int)VoxelBlock.Material.LENGTH - 1)
+            {
+                _selectedMat = (VoxelBlock.Material)1;
+            }
+            else
+            {
+                _selectedMat = (VoxelBlock.Material)((int)_selectedMat + 1);
+            }
+        }
+
+        // Manipulate blocks
         if (Input.GetMouseButtonDown(0))
         {
             _placingBlocks = true;
