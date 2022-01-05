@@ -9,6 +9,7 @@ public struct VoxelBlock
         Empty = 0,  // No block
         Clean,
         Dirt,
+        Grass,
         LENGTH  // don't touch
     }
 

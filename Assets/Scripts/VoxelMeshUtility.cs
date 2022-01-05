@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public static class VoxelMeshUtility
 {
-    public const int TEXTURE_ATLAS_SIZE = 8;
+    public const int TEXTURE_ATLAS_SIZE = 4;
     public const int MAX_MATERIAL_COUNT = TEXTURE_ATLAS_SIZE * TEXTURE_ATLAS_SIZE;
 
     private const float UV_SCALE = 1.0f / TEXTURE_ATLAS_SIZE;
