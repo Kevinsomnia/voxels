@@ -25,7 +25,6 @@ public class VoxelObject : MonoBehaviour
     public void AddBlock(Vector3Int pos, VoxelBlock.Material material, bool updateMesh = true)
     {
         Vector3Int chunkLoc = GetChunkLocation(pos);
-        // Ensure the chunk exists, then add the block to it.
         VoxelChunk chunk = GetOrAllocateChunk(chunkLoc);
 
         if (chunk != null)
@@ -33,6 +32,9 @@ public class VoxelObject : MonoBehaviour
             // Convert to chunk local coordinate.
             Vector3Int chunkRelativeLoc = pos - (chunkLoc * VoxelChunk.CHUNK_SIZE);
             chunk.AddBlock(chunkRelativeLoc, material);
+
+            if (updateMesh)
+                chunk.UpdateMeshForMaterial(material);
         }
     }
 
@@ -62,17 +64,73 @@ public class VoxelObject : MonoBehaviour
         {
             Vector3Int minChunkLoc = GetChunkLocation(minBlockLoc);
             Vector3Int maxChunkLoc = GetChunkLocation(maxBlockLoc);
+            UpdateMeshesForMaterial(minChunkLoc, maxChunkLoc, material);
+        }
+    }
 
-            for (int z = minChunkLoc.z; z <= maxChunkLoc.z; z++)
+    public void RemoveBlock(Vector3Int pos, bool updateMesh = true)
+    {
+        Vector3Int chunkLoc = GetChunkLocation(pos);
+        VoxelChunk chunk = GetOrAllocateChunk(chunkLoc);
+
+        if (chunk != null)
+        {
+            // Convert to chunk local coordinate.
+            Vector3Int chunkRelativeLoc = pos - (chunkLoc * VoxelChunk.CHUNK_SIZE);
+            VoxelBlock block = chunk.GetBlock(chunkRelativeLoc);
+            VoxelBlock.Material prevMaterial = block.material;
+            chunk.ClearBlock(chunkRelativeLoc);
+
+            if (updateMesh)
+                chunk.UpdateMeshForMaterial(prevMaterial);
+        }
+    }
+
+    public void RemoveBlocks(Vector3Int start, Vector3Int end, bool updateMesh = true)
+    {
+        Vector3Int minBlockLoc = new Vector3Int(
+            Mathf.Clamp(Mathf.Min(start.x, end.x), 0, MAX_BLOCK_EDGE_SIZE - 1),
+            Mathf.Clamp(Mathf.Min(start.y, end.y), 0, MAX_BLOCK_EDGE_SIZE - 1),
+            Mathf.Clamp(Mathf.Min(start.z, end.z), 0, MAX_BLOCK_EDGE_SIZE - 1)
+        );
+        Vector3Int maxBlockLoc = new Vector3Int(
+            Mathf.Clamp(Mathf.Max(start.x, end.x), 0, MAX_BLOCK_EDGE_SIZE - 1),
+            Mathf.Clamp(Mathf.Max(start.y, end.y), 0, MAX_BLOCK_EDGE_SIZE - 1),
+            Mathf.Clamp(Mathf.Max(start.z, end.z), 0, MAX_BLOCK_EDGE_SIZE - 1)
+        );
+
+        for (int z = minBlockLoc.z; z <= maxBlockLoc.z; z++)
+        {
+            for (int y = minBlockLoc.y; y <= maxBlockLoc.y; y++)
             {
-                for (int y = minChunkLoc.y; y <= maxChunkLoc.y; y++)
+                for (int x = minBlockLoc.x; x <= maxBlockLoc.x; x++)
+                    RemoveBlock(new Vector3Int(x, y, z), updateMesh: false);
+            }
+        }
+
+        if (updateMesh)
+        {
+            Vector3Int minChunkLoc = GetChunkLocation(minBlockLoc);
+            Vector3Int maxChunkLoc = GetChunkLocation(maxBlockLoc);
+
+            // TODO: dirty flag, simplify
+            for (int i = 1; i < (int)VoxelBlock.Material.LENGTH; i++)
+                UpdateMeshesForMaterial(minChunkLoc, maxChunkLoc, (VoxelBlock.Material)i);
+        }
+    }
+
+    private void UpdateMeshesForMaterial(Vector3Int startChunk, Vector3Int endChunk, VoxelBlock.Material material)
+    {
+        for (int z = startChunk.z; z <= endChunk.z; z++)
+        {
+            for (int y = startChunk.y; y <= endChunk.y; y++)
+            {
+                for (int x = startChunk.x; x <= endChunk.x; x++)
                 {
-                    for (int x = minChunkLoc.x; x <= maxChunkLoc.x; x++)
-                    {
-                        VoxelChunk chunk = GetOrAllocateChunk(new Vector3Int(x, y, z));
-                        // Don't need to null-check since we already clamped the block/chunk location.
+                    VoxelChunk chunk = GetOrAllocateChunk(new Vector3Int(x, y, z));
+
+                    if (chunk != null)
                         chunk.UpdateMeshForMaterial(material);
-                    }
                 }
             }
         }

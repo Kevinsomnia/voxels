@@ -24,8 +24,7 @@ public class VoxelChunk : MonoBehaviour
 
     private const int MAX_BLOCK_COUNT = CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE;
 
-    // Should be the same order as the VoxelBlock.Material enum
-    [SerializeField] private Material[] _blockMaterials;
+    [SerializeField] private Material _blockMaterial;
 
     // Raw block data used to build the meshes.
     private VoxelBlock[] _blocks;
@@ -55,6 +54,12 @@ public class VoxelChunk : MonoBehaviour
             if (_groups[i] != null)
                 _groups[i].Dispose();
         }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public VoxelBlock GetBlock(Vector3Int position)
+    {
+        return _blocks[GetBlockIndex(position.x, position.y, position.z)];
     }
 
     public void AddBlock(Vector3Int position, VoxelBlock.Material material)
@@ -104,7 +109,7 @@ public class VoxelChunk : MonoBehaviour
 
         group.mesh = new Mesh();
         group.meshFilter.sharedMesh = group.mesh;
-        group.meshRenderer.sharedMaterial = _blockMaterials[groupIndex];
+        group.meshRenderer.sharedMaterial = _blockMaterial;
 
         _groups[groupIndex] = group;
         return group;
@@ -113,9 +118,7 @@ public class VoxelChunk : MonoBehaviour
     public void ForceUpdateMesh()
     {
         for (int i = 0; i < _groups.Length; i++)
-        {
             UpdateMeshForMaterial((VoxelBlock.Material)(i + 1));
-        }
     }
 
     public void UpdateMeshForMaterial(VoxelBlock.Material material)

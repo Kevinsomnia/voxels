@@ -329,6 +329,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _voxelObjectPrefab: {fileID: 7314399689789643229, guid: 61a84aa6d43d8d04fbfcb4fc708ada20, type: 3}
   _visualizer: {fileID: 2052535788}
+  _placeToolColor: {r: 0.5137255, g: 0.7254902, b: 1, a: 0.5019608}
+  _deleteToolColor: {r: 1, g: 0.5137255, b: 0.5885011, a: 0.5019608}
+  _paintToolColor: {r: 0.5137255, g: 1, b: 0.585925, a: 0.5019608}
 --- !u!1 &2052535788
 GameObject:
   m_ObjectHideFlags: 0

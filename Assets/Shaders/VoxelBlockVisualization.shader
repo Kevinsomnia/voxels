@@ -69,7 +69,7 @@
                 fixed yCol = tex2D(_MainTex, (i.worldPos.xz / _GridScale) - float2(0.5, 0.5)).r * i.triplanarWeights.y;
                 fixed zCol = tex2D(_MainTex, (i.worldPos.xy / _GridScale) - float2(0.5, 0.5)).r * i.triplanarWeights.z;
 
-                finalCol.a *= (xCol + yCol + zCol);
+                finalCol.a *= xCol + yCol + zCol;
 
                 fixed intersectFactor = 1.0 - saturate((LinearEyeDepth(tex2Dproj(_CameraDepthTexture, i.screenPos).r) - i.screenPos.z) / _IntersectionAmount);
                 intersectFactor += 1.0;
