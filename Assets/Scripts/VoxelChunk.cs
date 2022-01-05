@@ -70,22 +70,35 @@ public class VoxelChunk : MonoBehaviour
         if (_blocks[index].material == VoxelBlock.Material.Empty)
         {
             _blocks[index].material = material;
-            GetOrCreateGroupForMaterial(material);
-            int groupIndex = (int)material - 1;
-            _groups[groupIndex].isDirty = true;
+            GetOrCreateGroupForMaterial(material).isDirty = true;
         }
     }
 
     public void SetBlock(Vector3Int position, VoxelBlock.Material material)
     {
         int blockIndex = GetBlockIndex(position.x, position.y, position.z);
+        VoxelBlock.Material prevMat = _blocks[blockIndex].material;
 
-        if (_blocks[blockIndex].material != material)
+        if (prevMat != material)
         {
             _blocks[blockIndex].material = material;
-            GetOrCreateGroupForMaterial(material);
-            int groupIndex = (int)material - 1;
-            _groups[groupIndex].isDirty = true;
+            GetOrCreateGroupForMaterial(material).isDirty = true;
+
+            if (prevMat != VoxelBlock.Material.Empty)
+                GetGroupForMaterial(prevMat).isDirty = true;
+        }
+    }
+
+    public void PaintBlock(Vector3Int position, VoxelBlock.Material material)
+    {
+        int blockIndex = GetBlockIndex(position.x, position.y, position.z);
+        VoxelBlock.Material prevMat = _blocks[blockIndex].material;
+
+        if (prevMat != VoxelBlock.Material.Empty && prevMat != material)
+        {
+            _blocks[blockIndex].material = material;
+            GetOrCreateGroupForMaterial(material).isDirty = true;
+            GetGroupForMaterial(prevMat).isDirty = true;
         }
     }
 
@@ -97,9 +110,7 @@ public class VoxelChunk : MonoBehaviour
         if (prevMat != VoxelBlock.Material.Empty)
         {
             _blocks[index].material = VoxelBlock.Material.Empty;
-            GetOrCreateGroupForMaterial(prevMat);
-            int groupIndex = (int)prevMat - 1;
-            _groups[groupIndex].isDirty = true;
+            GetGroupForMaterial(prevMat).isDirty = true;
         }
     }
 
@@ -144,7 +155,7 @@ public class VoxelChunk : MonoBehaviour
     {
         GetOrCreateGroupForMaterial(material);
         int groupIndex = (int)material - 1;
-        BlockGroup group = _groups[groupIndex];
+        BlockGroup group = GetGroupForMaterial(material);
 
         if (group == null)
             return;
@@ -222,6 +233,12 @@ public class VoxelChunk : MonoBehaviour
         mesh.normals = _normalsBuffer.ToArray();
         mesh.uv = _uvsBuffer.ToArray();
         mesh.triangles = _trianglesBuffer.ToArray();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private BlockGroup GetGroupForMaterial(VoxelBlock.Material material)
+    {
+        return _groups[(int)material - 1];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

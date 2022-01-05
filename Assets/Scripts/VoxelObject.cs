@@ -40,16 +40,8 @@ public class VoxelObject : MonoBehaviour
 
     public void AddBlocks(Vector3Int start, Vector3Int end, VoxelBlock.Material material, bool updateMesh = true)
     {
-        Vector3Int minBlockLoc = new Vector3Int(
-            Mathf.Min(start.x, end.x),
-            Mathf.Min(start.y, end.y),
-            Mathf.Min(start.z, end.z)
-        );
-        Vector3Int maxBlockLoc = new Vector3Int(
-            Mathf.Max(start.x, end.x),
-            Mathf.Max(start.y, end.y),
-            Mathf.Max(start.z, end.z)
-        );
+        Vector3Int minBlockLoc = new Vector3Int(Mathf.Min(start.x, end.x), Mathf.Min(start.y, end.y), Mathf.Min(start.z, end.z));
+        Vector3Int maxBlockLoc = new Vector3Int(Mathf.Max(start.x, end.x), Mathf.Max(start.y, end.y), Mathf.Max(start.z, end.z));
 
         for (int z = minBlockLoc.z; z <= maxBlockLoc.z; z++)
         {
@@ -86,16 +78,8 @@ public class VoxelObject : MonoBehaviour
 
     public void RemoveBlocks(Vector3Int start, Vector3Int end, bool updateMesh = true)
     {
-        Vector3Int minBlockLoc = new Vector3Int(
-            Mathf.Min(start.x, end.x),
-            Mathf.Min(start.y, end.y),
-            Mathf.Min(start.z, end.z)
-        );
-        Vector3Int maxBlockLoc = new Vector3Int(
-            Mathf.Max(start.x, end.x),
-            Mathf.Max(start.y, end.y),
-            Mathf.Max(start.z, end.z)
-        );
+        Vector3Int minBlockLoc = new Vector3Int(Mathf.Min(start.x, end.x), Mathf.Min(start.y, end.y), Mathf.Min(start.z, end.z));
+        Vector3Int maxBlockLoc = new Vector3Int(Mathf.Max(start.x, end.x), Mathf.Max(start.y, end.y), Mathf.Max(start.z, end.z));
 
         for (int z = minBlockLoc.z; z <= maxBlockLoc.z; z++)
         {
@@ -103,6 +87,44 @@ public class VoxelObject : MonoBehaviour
             {
                 for (int x = minBlockLoc.x; x <= maxBlockLoc.x; x++)
                     RemoveBlock(new Vector3Int(x, y, z), updateMesh: false);
+            }
+        }
+
+        if (updateMesh)
+        {
+            Vector3Int minChunkLoc = GetChunkLocation(minBlockLoc);
+            Vector3Int maxChunkLoc = GetChunkLocation(maxBlockLoc);
+            UpdateMeshes(minChunkLoc, maxChunkLoc);
+        }
+    }
+
+    public void PaintBlock(Vector3Int pos, VoxelBlock.Material material, bool updateMesh = true)
+    {
+        Vector3Int chunkLoc = GetChunkLocation(pos);
+        VoxelChunk chunk = GetOrAllocateChunk(chunkLoc);
+
+        if (chunk != null)
+        {
+            // Convert to chunk local coordinate.
+            Vector3Int chunkRelativeLoc = pos - (chunkLoc * VoxelChunk.CHUNK_SIZE);
+            chunk.PaintBlock(chunkRelativeLoc, material);
+
+            if (updateMesh)
+                chunk.UpdateMesh();
+        }
+    }
+
+    public void PaintBlocks(Vector3Int start, Vector3Int end, VoxelBlock.Material material, bool updateMesh = true)
+    {
+        Vector3Int minBlockLoc = new Vector3Int(Mathf.Min(start.x, end.x), Mathf.Min(start.y, end.y), Mathf.Min(start.z, end.z));
+        Vector3Int maxBlockLoc = new Vector3Int(Mathf.Max(start.x, end.x), Mathf.Max(start.y, end.y), Mathf.Max(start.z, end.z));
+
+        for (int z = minBlockLoc.z; z <= maxBlockLoc.z; z++)
+        {
+            for (int y = minBlockLoc.y; y <= maxBlockLoc.y; y++)
+            {
+                for (int x = minBlockLoc.x; x <= maxBlockLoc.x; x++)
+                    PaintBlock(new Vector3Int(x, y, z), material, updateMesh: false);
             }
         }
 

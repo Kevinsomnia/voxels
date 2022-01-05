@@ -111,7 +111,7 @@ public class VoxelObjectTool : MonoBehaviour
                     _voxelObj.RemoveBlocks(startPlaceLoc, endPlaceLoc);
                     break;
                 case ToolType.Paint:
-                    // _voxelObj.PaintBlocks(startPlaceLoc, endPlaceLoc, _selectedMat);
+                    _voxelObj.PaintBlocks(startPlaceLoc, endPlaceLoc, _selectedMat);
                     break;
             }
         }
