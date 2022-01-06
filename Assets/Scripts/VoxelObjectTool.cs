@@ -50,7 +50,7 @@ public class VoxelObjectTool : MonoBehaviour
 
     private void OnGUI()
     {
-        GUILayout.Box("1. Place\n2. Delete\n3. Paint\nScroll: Adjust place tool distance\nLeft/Right Arrow: Cycle block material");
+        GUILayout.Box("1. Place\n2. Delete\n3. Paint\nScroll: Adjust place tool distance\nLeft/Right Arrow: Cycle block material\nHold Shift: Planar mode");
         GUILayout.Box("Selected material: " + _selectedMat);
     }
 
@@ -95,6 +95,8 @@ public class VoxelObjectTool : MonoBehaviour
         }
 
         // Manipulate blocks
+        HandleBrushBehavior();
+
         if (Input.GetMouseButtonDown(0))
         {
             _placingBlocks = true;
@@ -118,11 +120,9 @@ public class VoxelObjectTool : MonoBehaviour
                     break;
             }
         }
-
-        HandlePlacementVisualizer();
     }
 
-    private void HandlePlacementVisualizer()
+    private void HandleBrushBehavior()
     {
         _rayDistance += Input.GetAxis("Mouse ScrollWheel");
         _rayDistance = Mathf.Clamp(_rayDistance, 0.5f, 10f);
@@ -156,9 +156,32 @@ public class VoxelObjectTool : MonoBehaviour
             _endPlacePos = _startPlacePos;
         }
 
+        // Planar mode snaps the shape into 2 dimensions
+        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        {
+            Vector3 diff = _endPlacePos - _startPlacePos;
+            diff.x = Mathf.Abs(diff.x);
+            diff.y = Mathf.Abs(diff.y);
+            diff.z = Mathf.Abs(diff.z);
+
+            if (diff.x < diff.y && diff.x < diff.z)
+            {
+                _endPlacePos.x = _startPlacePos.x;
+            }
+            else if (diff.y < diff.x && diff.y < diff.z)
+            {
+                _endPlacePos.y = _startPlacePos.y;
+            }
+            else
+            {
+                _endPlacePos.z = _startPlacePos.z;
+            }
+        }
+
         // Constrain endPlacePos so that the size doesn't exceed the maximum.
         _endPlacePos = ConstrainTargetToMaxSize(_endPlacePos, anchor: _startPlacePos, Vector3Int.one * MAX_BRUSH_REGION_SIZE);
 
+        // Adjust position and scale of visualization box (center pivot).
         _visualizerTransform.position = (_startPlacePos + _endPlacePos) * 0.5f;
         Vector3 scale = _endPlacePos - _startPlacePos;
         scale.x = Mathf.Abs(scale.x) + (VoxelBlock.WORLD_SIZE * VISUALIZER_SIZE_MULTIPLIER);
