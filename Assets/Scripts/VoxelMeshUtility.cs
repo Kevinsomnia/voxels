@@ -64,9 +64,22 @@ public static class VoxelMeshUtility
         Vector3.back
     };
 
-    public static void AddQuad(List<Vector3> positions, List<Vector3> normals, List<Vector2> uvs, List<int> triangles, int x, int y, int z, Face face, VoxelBlock.Material material)
+    private static readonly List<Vector3> _globalPositionsBuffer = new List<Vector3>();
+    private static readonly List<Vector3> _globalNormalsBuffer = new List<Vector3>();
+    private static readonly List<Vector2> _globalUvsBuffer = new List<Vector2>();
+    private static readonly List<int> _globalTrianglesBuffer = new List<int>();
+
+    public static void BeginNewMesh()
     {
-        int indexStart = positions.Count;
+        _globalPositionsBuffer.Clear();
+        _globalNormalsBuffer.Clear();
+        _globalUvsBuffer.Clear();
+        _globalTrianglesBuffer.Clear();
+    }
+
+    public static void AddQuad(int x, int y, int z, Face face, VoxelBlock.Material material)
+    {
+        int indexStart = _globalPositionsBuffer.Count;
 
         int faceIndex = (int)face;
         int positionsStart = faceIndex * 4;
@@ -74,30 +87,50 @@ public static class VoxelMeshUtility
         for (int i = 0; i < 4; i++)
         {
             Vector3 offset = QUAD_POSITIONS[positionsStart + i];
-            positions.Add(new Vector3(offset.x + x, offset.y + y, offset.z + z));
+            _globalPositionsBuffer.Add(new Vector3(offset.x + x, offset.y + y, offset.z + z));
         }
 
         Vector3 normal = QUAD_NORMALS[faceIndex];
-        normals.Add(normal);
-        normals.Add(normal);
-        normals.Add(normal);
-        normals.Add(normal);
+        _globalNormalsBuffer.Add(normal);
+        _globalNormalsBuffer.Add(normal);
+        _globalNormalsBuffer.Add(normal);
+        _globalNormalsBuffer.Add(normal);
 
         int materialIndex = (int)material - 1;
         float uvOffsX = materialIndex;
         float uvOffsY = materialIndex / TEXTURE_ATLAS_SIZE;
-        uvs.Add(new Vector2(UV_INSET + uvOffsX, UV_INSET_INVERTED + uvOffsY) * UV_SCALE);
-        uvs.Add(new Vector2(UV_INSET_INVERTED + uvOffsX, UV_INSET_INVERTED + uvOffsY) * UV_SCALE);
-        uvs.Add(new Vector2(UV_INSET + uvOffsX, UV_INSET + uvOffsY) * UV_SCALE);
-        uvs.Add(new Vector2(UV_INSET_INVERTED + uvOffsX, UV_INSET + uvOffsY) * UV_SCALE);
+        _globalUvsBuffer.Add(new Vector2(UV_INSET + uvOffsX, UV_INSET_INVERTED + uvOffsY) * UV_SCALE);
+        _globalUvsBuffer.Add(new Vector2(UV_INSET_INVERTED + uvOffsX, UV_INSET_INVERTED + uvOffsY) * UV_SCALE);
+        _globalUvsBuffer.Add(new Vector2(UV_INSET + uvOffsX, UV_INSET + uvOffsY) * UV_SCALE);
+        _globalUvsBuffer.Add(new Vector2(UV_INSET_INVERTED + uvOffsX, UV_INSET + uvOffsY) * UV_SCALE);
 
         // Top-right triangle
-        triangles.Add(indexStart);
-        triangles.Add(indexStart + 1);
-        triangles.Add(indexStart + 3);
+        _globalTrianglesBuffer.Add(indexStart);
+        _globalTrianglesBuffer.Add(indexStart + 1);
+        _globalTrianglesBuffer.Add(indexStart + 3);
         // Bottom-left triangle
-        triangles.Add(indexStart);
-        triangles.Add(indexStart + 3);
-        triangles.Add(indexStart + 2);
+        _globalTrianglesBuffer.Add(indexStart);
+        _globalTrianglesBuffer.Add(indexStart + 3);
+        _globalTrianglesBuffer.Add(indexStart + 2);
+    }
+
+    public static List<Vector3> GetVertexPositions()
+    {
+        return _globalPositionsBuffer;
+    }
+
+    public static List<Vector3> GetVertexNormals()
+    {
+        return _globalNormalsBuffer;
+    }
+
+    public static List<Vector2> GetVertexUVs()
+    {
+        return _globalUvsBuffer;
+    }
+
+    public static List<int> GetTriangles()
+    {
+        return _globalTrianglesBuffer;
     }
 }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -21,11 +22,6 @@ public class VoxelChunk : MonoBehaviour
     private VoxelObject _voxelObj;
     private Vector3Int _location;
     private VoxelBlock[] _blocks;
-    // Share lists for performance and mesh buffers
-    private List<Vector3> _positionsBuffer;
-    private List<Vector3> _normalsBuffer;
-    private List<Vector2> _uvsBuffer;
-    private List<int> _trianglesBuffer;
 
     private void Awake()
     {
@@ -34,11 +30,6 @@ public class VoxelChunk : MonoBehaviour
         _mesh = new Mesh();
         _meshFilter.sharedMesh = _mesh;
         _meshNeedsRebuilding = false;
-
-        _positionsBuffer = new List<Vector3>();
-        _normalsBuffer = new List<Vector3>();
-        _uvsBuffer = new List<Vector2>();
-        _trianglesBuffer = new List<int>();
     }
 
     private void OnDestroy()
@@ -107,11 +98,7 @@ public class VoxelChunk : MonoBehaviour
         if (_meshNeedsRebuilding)
         {
             _meshNeedsRebuilding = false;
-
-            _positionsBuffer.Clear();
-            _normalsBuffer.Clear();
-            _uvsBuffer.Clear();
-            _trianglesBuffer.Clear();
+            VoxelMeshUtility.BeginNewMesh();
 
             // Global block locations of this chunk and (x + 1, y + 1, z + 1) chunk
             Vector3Int thisMinBlockLoc = _location * CHUNK_SIZE;
@@ -135,62 +122,48 @@ public class VoxelChunk : MonoBehaviour
                             if ((x == 0 && _voxelObj.GetBlock(thisMinBlockLoc.x - 1, thisMinBlockLoc.y + y, thisMinBlockLoc.z + z).material == VoxelBlock.Material.Empty) ||
                                 (x != 0 && _blocks[GetBlockIndex(x - 1, y, z)].material == VoxelBlock.Material.Empty))
                             {
-                                VoxelMeshUtility.AddQuad(
-                                    _positionsBuffer, _normalsBuffer, _uvsBuffer, _trianglesBuffer,
-                                    x, y, z, VoxelMeshUtility.Face.Left, targetBlock.material
-                                );
+                                VoxelMeshUtility.AddQuad(x, y, z, VoxelMeshUtility.Face.Left, targetBlock.material);
                             }
                             if ((x == CHUNK_SIZE - 1 && _voxelObj.GetBlock(nextMinBlockLoc.x, thisMinBlockLoc.y + y, thisMinBlockLoc.z + z).material == VoxelBlock.Material.Empty) ||
                                 (x != CHUNK_SIZE - 1 && _blocks[GetBlockIndex(x + 1, y, z)].material == VoxelBlock.Material.Empty))
                             {
-                                VoxelMeshUtility.AddQuad(
-                                    _positionsBuffer, _normalsBuffer, _uvsBuffer, _trianglesBuffer,
-                                    x, y, z, VoxelMeshUtility.Face.Right, targetBlock.material
-                                );
+                                VoxelMeshUtility.AddQuad(x, y, z, VoxelMeshUtility.Face.Right, targetBlock.material);
                             }
                             if ((y == CHUNK_SIZE - 1 && _voxelObj.GetBlock(thisMinBlockLoc.x + x, nextMinBlockLoc.y, thisMinBlockLoc.z + z).material == VoxelBlock.Material.Empty) ||
                                 (y != CHUNK_SIZE - 1 && _blocks[GetBlockIndex(x, y + 1, z)].material == VoxelBlock.Material.Empty))
                             {
-                                VoxelMeshUtility.AddQuad(
-                                    _positionsBuffer, _normalsBuffer, _uvsBuffer, _trianglesBuffer,
-                                    x, y, z, VoxelMeshUtility.Face.Up, targetBlock.material
-                                );
+                                VoxelMeshUtility.AddQuad(x, y, z, VoxelMeshUtility.Face.Up, targetBlock.material);
                             }
                             if ((y == 0 && _voxelObj.GetBlock(thisMinBlockLoc.x + x, thisMinBlockLoc.y - 1, thisMinBlockLoc.z + z).material == VoxelBlock.Material.Empty) ||
                                 (y != 0 && _blocks[GetBlockIndex(x, y - 1, z)].material == VoxelBlock.Material.Empty))
                             {
-                                VoxelMeshUtility.AddQuad(
-                                    _positionsBuffer, _normalsBuffer, _uvsBuffer, _trianglesBuffer,
-                                    x, y, z, VoxelMeshUtility.Face.Down, targetBlock.material
-                                );
+                                VoxelMeshUtility.AddQuad(x, y, z, VoxelMeshUtility.Face.Down, targetBlock.material);
                             }
                             if ((z == CHUNK_SIZE - 1 && _voxelObj.GetBlock(thisMinBlockLoc.x + x, thisMinBlockLoc.y + y, nextMinBlockLoc.z).material == VoxelBlock.Material.Empty) ||
                                 (z != CHUNK_SIZE - 1 && _blocks[GetBlockIndex(x, y, z + 1)].material == VoxelBlock.Material.Empty))
                             {
-                                VoxelMeshUtility.AddQuad(
-                                    _positionsBuffer, _normalsBuffer, _uvsBuffer, _trianglesBuffer,
-                                    x, y, z, VoxelMeshUtility.Face.Forward, targetBlock.material
-                                );
+                                VoxelMeshUtility.AddQuad(x, y, z, VoxelMeshUtility.Face.Forward, targetBlock.material);
                             }
                             if ((z == 0 && _voxelObj.GetBlock(thisMinBlockLoc.x + x, thisMinBlockLoc.y + y, thisMinBlockLoc.z - 1).material == VoxelBlock.Material.Empty) ||
                                 (z != 0 && _blocks[GetBlockIndex(x, y, z - 1)].material == VoxelBlock.Material.Empty))
                             {
-                                VoxelMeshUtility.AddQuad(
-                                    _positionsBuffer, _normalsBuffer, _uvsBuffer, _trianglesBuffer,
-                                    x, y, z, VoxelMeshUtility.Face.Back, targetBlock.material
-                                );
+                                VoxelMeshUtility.AddQuad(x, y, z, VoxelMeshUtility.Face.Back, targetBlock.material);
                             }
                         }
                     }
                 }
             }
 
+            List<Vector3> verts = VoxelMeshUtility.GetVertexPositions();
+            List<Vector3> normals = VoxelMeshUtility.GetVertexNormals();
+            List<Vector2> uvs = VoxelMeshUtility.GetVertexUVs();
+
             _mesh.Clear();
             _mesh.MarkDynamic();
-            _mesh.vertices = _positionsBuffer.ToArray();
-            _mesh.normals = _normalsBuffer.ToArray();
-            _mesh.uv = _uvsBuffer.ToArray();
-            _mesh.triangles = _trianglesBuffer.ToArray();
+            _mesh.SetVertices(verts, 0, verts.Count, MeshUpdateFlags.DontValidateIndices);
+            _mesh.SetNormals(normals, 0, normals.Count, MeshUpdateFlags.DontValidateIndices);
+            _mesh.SetUVs(channel: 0, uvs, 0, uvs.Count, MeshUpdateFlags.DontValidateIndices);
+            _mesh.SetTriangles(VoxelMeshUtility.GetTriangles(), submesh: 0);
 
             // Will need to clear and re-assign the mesh to properly refresh the collider.
             _meshCollider.sharedMesh = null;
