@@ -160,6 +160,16 @@ public class VoxelObject : MonoBehaviour
         }
     }
 
+    private VoxelChunk GetChunk(Vector3Int chunkLoc)
+    {
+        int chunkKey = GetChunkKey(chunkLoc.x, chunkLoc.y, chunkLoc.z);
+
+        if (chunkKey >= 0 && chunkKey < MAX_CHUNK_COUNT && _chunks.TryGetValue(chunkKey, out VoxelChunk chunk))
+            return chunk;
+
+        return null;
+    }
+
     private VoxelChunk GetOrAllocateChunk(Vector3Int chunkLoc)
     {
         // Position bounds check.
@@ -177,6 +187,7 @@ public class VoxelObject : MonoBehaviour
         else
         {
             result = Instantiate(_chunkPrefab);
+            result.Setup(this, chunkLoc);
             Transform tr = result.transform;
             tr.parent = _transform;
             tr.localPosition = new Vector3(chunkLoc.x, chunkLoc.y, chunkLoc.z) * VoxelChunk.CHUNK_WORLD_SIZE;
@@ -185,6 +196,24 @@ public class VoxelObject : MonoBehaviour
         }
 
         return result;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public VoxelBlock GetBlock(Vector3Int blockLoc)
+    {
+        return GetBlock(blockLoc.x, blockLoc.y, blockLoc.z);
+    }
+
+    public VoxelBlock GetBlock(int x, int y, int z)
+    {
+        Vector3Int chunkLoc = GetChunkLocation(x, y, z);
+        VoxelChunk chunk = GetChunk(chunkLoc);
+
+        if (chunk == null)
+            return new VoxelBlock();
+
+        Vector3Int chunkRelativeLoc = new Vector3Int(x, y, z) - (chunkLoc * VoxelChunk.CHUNK_SIZE);
+        return chunk.GetBlock(chunkRelativeLoc);
     }
 
     public static Vector3Int GetBlockLocation(Vector3 worldPos)
@@ -198,21 +227,29 @@ public class VoxelObject : MonoBehaviour
 
     public static Vector3Int GetChunkLocation(Vector3 worldPos)
     {
-        float chunkWorldSize = VoxelChunk.CHUNK_SIZE * VoxelBlock.WORLD_SIZE;
-
         return new Vector3Int(
-            Mathf.RoundToInt(worldPos.x / chunkWorldSize),
-            Mathf.RoundToInt(worldPos.y / chunkWorldSize),
-            Mathf.RoundToInt(worldPos.z / chunkWorldSize)
+            Mathf.RoundToInt(worldPos.x / VoxelChunk.CHUNK_WORLD_SIZE),
+            Mathf.RoundToInt(worldPos.y / VoxelChunk.CHUNK_WORLD_SIZE),
+            Mathf.RoundToInt(worldPos.z / VoxelChunk.CHUNK_WORLD_SIZE)
         );
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Vector3Int GetChunkLocation(Vector3Int blockLoc)
     {
-        if (blockLoc.x < 0 || blockLoc.y < 0 || blockLoc.z < 0)
+        return GetChunkLocation(blockLoc.x, blockLoc.y, blockLoc.z);
+    }
+
+    public static Vector3Int GetChunkLocation(int x, int y, int z)
+    {
+        if (x < 0 || y < 0 || z < 0)
             return new Vector3Int(-1, -1, -1);
 
-        return blockLoc / VoxelChunk.CHUNK_SIZE;
+        return new Vector3Int(
+            x / VoxelChunk.CHUNK_SIZE,
+            y / VoxelChunk.CHUNK_SIZE,
+            z / VoxelChunk.CHUNK_SIZE
+        );
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
