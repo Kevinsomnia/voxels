@@ -10,6 +10,7 @@ public class VoxelObjectTool : MonoBehaviour
     }
 
     private const float VISUALIZER_SIZE_MULTIPLIER = 1.05f;
+    private const int MAX_BRUSH_REGION_SIZE = 48;
 
     private static readonly int _Color = Shader.PropertyToID("_Color");
 
@@ -155,6 +156,9 @@ public class VoxelObjectTool : MonoBehaviour
             _endPlacePos = _startPlacePos;
         }
 
+        // Constrain endPlacePos so that the size doesn't exceed the maximum.
+        _endPlacePos = ConstrainTargetToMaxSize(_endPlacePos, anchor: _startPlacePos, Vector3Int.one * MAX_BRUSH_REGION_SIZE);
+
         _visualizerTransform.position = (_startPlacePos + _endPlacePos) * 0.5f;
         Vector3 scale = _endPlacePos - _startPlacePos;
         scale.x = Mathf.Abs(scale.x) + (VoxelBlock.WORLD_SIZE * VISUALIZER_SIZE_MULTIPLIER);
@@ -185,5 +189,21 @@ public class VoxelObjectTool : MonoBehaviour
     {
         Vector3Int loc = VoxelObject.GetBlockLocation(worldPos);
         return new Vector3(loc.x, loc.y, loc.z) * VoxelBlock.WORLD_SIZE;
+    }
+
+    private static Vector3 ConstrainTargetToMaxSize(Vector3 target, Vector3 anchor, Vector3Int maxBlockSize)
+    {
+        Vector3 maxSize = ((Vector3)maxBlockSize - Vector3.one) * VoxelBlock.WORLD_SIZE;
+        Vector3 diff = target - anchor;
+        Vector3 result = target;
+
+        if (Mathf.Abs(diff.x) > maxSize.x)
+            result.x = (diff.x > 0f) ? anchor.x + maxSize.x : anchor.x - maxSize.x;
+        if (Mathf.Abs(diff.y) > maxSize.y)
+            result.y = (diff.y > 0f) ? anchor.y + maxSize.y : anchor.y - maxSize.y;
+        if (Mathf.Abs(diff.z) > maxSize.z)
+            result.z = (diff.z > 0f) ? anchor.z + maxSize.z : anchor.z - maxSize.z;
+
+        return result;
     }
 }
