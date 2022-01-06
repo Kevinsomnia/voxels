@@ -11,6 +11,8 @@ public class VoxelObjectTool : MonoBehaviour
 
     private const float VISUALIZER_SIZE_MULTIPLIER = 1.05f;
 
+    private static readonly int _Color = Shader.PropertyToID("_Color");
+
     [SerializeField] private VoxelObject _voxelObjectPrefab;
     [SerializeField] private GameObject _visualizer;
     [SerializeField] private Color _placeToolColor = Color.blue;
@@ -126,6 +128,23 @@ public class VoxelObjectTool : MonoBehaviour
 
         Vector3 targetPlacePos = _transform.position + (_transform.forward * _rayDistance);
 
+        if (Physics.Raycast(_transform.position, _transform.forward, out RaycastHit hit, _rayDistance))
+        {
+            float normalsOffset;
+
+            switch (_currToolType)
+            {
+                case ToolType.Place:
+                    normalsOffset = VoxelBlock.WORLD_SIZE * 0.5f;   // Neighbor
+                    break;
+                default:
+                    normalsOffset = -VoxelBlock.WORLD_SIZE * 0.5f;  // Target
+                    break;
+            }
+
+            targetPlacePos = hit.point + (hit.normal * normalsOffset);
+        }
+
         if (_placingBlocks)
         {
             _endPlacePos = GetCursorPosition(targetPlacePos);
@@ -151,13 +170,13 @@ public class VoxelObjectTool : MonoBehaviour
         switch (_currToolType)
         {
             case ToolType.Place:
-                _visualizerRenderer.material.SetColor("_Color", _placeToolColor);
+                _visualizerRenderer.material.SetColor(_Color, _placeToolColor);
                 break;
             case ToolType.Delete:
-                _visualizerRenderer.material.SetColor("_Color", _deleteToolColor);
+                _visualizerRenderer.material.SetColor(_Color, _deleteToolColor);
                 break;
             case ToolType.Paint:
-                _visualizerRenderer.material.SetColor("_Color", _paintToolColor);
+                _visualizerRenderer.material.SetColor(_Color, _paintToolColor);
                 break;
         }
     }

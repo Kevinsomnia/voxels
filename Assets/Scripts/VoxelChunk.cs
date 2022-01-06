@@ -12,6 +12,7 @@ public class VoxelChunk : MonoBehaviour
 
     [SerializeField] private MeshFilter _meshFilter;
     [SerializeField] private MeshRenderer _meshRenderer;
+    [SerializeField] private MeshCollider _meshCollider;
 
     private Mesh _mesh;
     private bool _meshNeedsRebuilding;
@@ -172,6 +173,10 @@ public class VoxelChunk : MonoBehaviour
             _mesh.normals = _normalsBuffer.ToArray();
             _mesh.uv = _uvsBuffer.ToArray();
             _mesh.triangles = _trianglesBuffer.ToArray();
+
+            // Will need to clear and re-assign the mesh to properly refresh the collider.
+            _meshCollider.sharedMesh = null;
+            _meshCollider.sharedMesh = _mesh;
         }
     }
 
