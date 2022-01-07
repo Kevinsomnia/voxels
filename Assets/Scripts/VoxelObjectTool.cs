@@ -42,7 +42,10 @@ public class VoxelObjectTool : MonoBehaviour
         _visualizerRenderer.material.SetFloat("_GridScale", VoxelBlock.WORLD_SIZE);
 
         if (_voxelObj == null)
-            _voxelObj = Instantiate(_voxelObjectPrefab);
+        {
+            Vector3 centerPivotOffset = new Vector3(VoxelObject.MAX_WORLD_SIZE, 0f, VoxelObject.MAX_WORLD_SIZE) * -0.5f;
+            _voxelObj = Instantiate(_voxelObjectPrefab, centerPivotOffset, Quaternion.identity);
+        }
 
         SetToolType(ToolType.Place);
         _selectedMat = VoxelBlock.Material.Clean;
@@ -104,8 +107,8 @@ public class VoxelObjectTool : MonoBehaviour
         else if (Input.GetMouseButtonUp(0))
         {
             _placingBlocks = false;
-            Vector3Int startPlaceLoc = VoxelObject.GetBlockLocation(_startPlacePos);
-            Vector3Int endPlaceLoc = VoxelObject.GetBlockLocation(_endPlacePos);
+            Vector3Int startPlaceLoc = _voxelObj.GetBlockLocation(_startPlacePos);
+            Vector3Int endPlaceLoc = _voxelObj.GetBlockLocation(_endPlacePos);
 
             switch (_currToolType)
             {
@@ -208,10 +211,11 @@ public class VoxelObjectTool : MonoBehaviour
         }
     }
 
-    private static Vector3 GetCursorPosition(Vector3 worldPos)
+    private Vector3 GetCursorPosition(Vector3 worldPos)
     {
-        Vector3Int loc = VoxelObject.GetBlockLocation(worldPos);
-        return new Vector3(loc.x, loc.y, loc.z) * VoxelBlock.WORLD_SIZE;
+        Vector3Int loc = _voxelObj.GetBlockLocation(worldPos);
+        Vector3 relativePos = new Vector3(loc.x, loc.y, loc.z) * VoxelBlock.WORLD_SIZE;
+        return relativePos + _voxelObj.transform.position;
     }
 
     private static Vector3 ConstrainTargetToMaxSize(Vector3 target, Vector3 anchor, Vector3Int maxBlockSize)

@@ -8,6 +8,8 @@ public class VoxelObject : MonoBehaviour
     public const int MAX_OBJECT_SIZE = 1024;
     // Max number of blocks in a single dimension of the voxel object.
     public const int MAX_BLOCK_EDGE_SIZE = MAX_OBJECT_SIZE * VoxelChunk.CHUNK_SIZE;
+    // World size of all chunks in a single dimension of the voxel object.
+    public const float MAX_WORLD_SIZE = MAX_OBJECT_SIZE * VoxelChunk.CHUNK_WORLD_SIZE;
 
     private const int MAX_CHUNK_COUNT = MAX_OBJECT_SIZE * MAX_OBJECT_SIZE * MAX_OBJECT_SIZE;
 
@@ -216,8 +218,10 @@ public class VoxelObject : MonoBehaviour
         return chunk.GetBlock(chunkRelativeLoc);
     }
 
-    public static Vector3Int GetBlockLocation(Vector3 worldPos)
+    public Vector3Int GetBlockLocation(Vector3 worldPos)
     {
+        worldPos -= _transform.position;
+
         return new Vector3Int(
             Mathf.RoundToInt(worldPos.x / VoxelBlock.WORLD_SIZE),
             Mathf.RoundToInt(worldPos.y / VoxelBlock.WORLD_SIZE),
@@ -225,8 +229,10 @@ public class VoxelObject : MonoBehaviour
         );
     }
 
-    public static Vector3Int GetChunkLocation(Vector3 worldPos)
+    public Vector3Int GetChunkLocation(Vector3 worldPos)
     {
+        worldPos -= _transform.position;
+
         return new Vector3Int(
             Mathf.RoundToInt(worldPos.x / VoxelChunk.CHUNK_WORLD_SIZE),
             Mathf.RoundToInt(worldPos.y / VoxelChunk.CHUNK_WORLD_SIZE),
