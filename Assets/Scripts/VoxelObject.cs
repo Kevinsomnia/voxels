@@ -5,13 +5,13 @@ using System.Runtime.CompilerServices;
 public class VoxelObject : MonoBehaviour
 {
     // Max number of chunks in a single dimension of the voxel object.
-    public const int MAX_OBJECT_SIZE = 1024;
+    public const int MAX_CHUNK_EDGE_SIZE = 1024;
     // Max number of blocks in a single dimension of the voxel object.
-    public const int MAX_BLOCK_EDGE_SIZE = MAX_OBJECT_SIZE * VoxelChunk.CHUNK_SIZE;
+    public const int MAX_BLOCK_EDGE_SIZE = MAX_CHUNK_EDGE_SIZE * VoxelChunk.MAX_BLOCK_EDGE_SIZE;
     // World size of all chunks in a single dimension of the voxel object.
-    public const float MAX_WORLD_SIZE = MAX_OBJECT_SIZE * VoxelChunk.CHUNK_WORLD_SIZE;
+    public const float MAX_WORLD_SIZE = MAX_CHUNK_EDGE_SIZE * VoxelChunk.CHUNK_WORLD_SIZE;
 
-    private const int MAX_CHUNK_COUNT = MAX_OBJECT_SIZE * MAX_OBJECT_SIZE * MAX_OBJECT_SIZE;
+    private const int MAX_CHUNK_COUNT = MAX_CHUNK_EDGE_SIZE * MAX_CHUNK_EDGE_SIZE * MAX_CHUNK_EDGE_SIZE;
 
     [SerializeField] private VoxelChunk _chunkPrefab;
 
@@ -32,7 +32,7 @@ public class VoxelObject : MonoBehaviour
         if (chunk != null)
         {
             // Convert to chunk local coordinate.
-            Vector3Int chunkRelativeLoc = pos - (chunkLoc * VoxelChunk.CHUNK_SIZE);
+            Vector3Int chunkRelativeLoc = pos - (chunkLoc * VoxelChunk.MAX_BLOCK_EDGE_SIZE);
             chunk.AddBlock(chunkRelativeLoc, material);
 
             if (updateMesh)
@@ -70,7 +70,7 @@ public class VoxelObject : MonoBehaviour
         if (chunk != null)
         {
             // Convert to chunk local coordinate.
-            Vector3Int chunkRelativeLoc = pos - (chunkLoc * VoxelChunk.CHUNK_SIZE);
+            Vector3Int chunkRelativeLoc = pos - (chunkLoc * VoxelChunk.MAX_BLOCK_EDGE_SIZE);
             chunk.ClearBlock(chunkRelativeLoc);
 
             if (updateMesh)
@@ -108,7 +108,7 @@ public class VoxelObject : MonoBehaviour
         if (chunk != null)
         {
             // Convert to chunk local coordinate.
-            Vector3Int chunkRelativeLoc = pos - (chunkLoc * VoxelChunk.CHUNK_SIZE);
+            Vector3Int chunkRelativeLoc = pos - (chunkLoc * VoxelChunk.MAX_BLOCK_EDGE_SIZE);
             chunk.PaintBlock(chunkRelativeLoc, material);
 
             if (updateMesh)
@@ -214,7 +214,7 @@ public class VoxelObject : MonoBehaviour
         if (chunk == null)
             return new VoxelBlock();
 
-        Vector3Int chunkRelativeLoc = new Vector3Int(x, y, z) - (chunkLoc * VoxelChunk.CHUNK_SIZE);
+        Vector3Int chunkRelativeLoc = new Vector3Int(x, y, z) - (chunkLoc * VoxelChunk.MAX_BLOCK_EDGE_SIZE);
         return chunk.GetBlock(chunkRelativeLoc);
     }
 
@@ -252,15 +252,15 @@ public class VoxelObject : MonoBehaviour
             return new Vector3Int(-1, -1, -1);
 
         return new Vector3Int(
-            x / VoxelChunk.CHUNK_SIZE,
-            y / VoxelChunk.CHUNK_SIZE,
-            z / VoxelChunk.CHUNK_SIZE
+            x / VoxelChunk.MAX_BLOCK_EDGE_SIZE,
+            y / VoxelChunk.MAX_BLOCK_EDGE_SIZE,
+            z / VoxelChunk.MAX_BLOCK_EDGE_SIZE
         );
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int GetChunkKey(int x, int y, int z)
     {
-        return (z * MAX_OBJECT_SIZE * MAX_OBJECT_SIZE) + (y * MAX_OBJECT_SIZE) + x;
+        return (z * MAX_CHUNK_EDGE_SIZE * MAX_CHUNK_EDGE_SIZE) + (y * MAX_CHUNK_EDGE_SIZE) + x;
     }
 }

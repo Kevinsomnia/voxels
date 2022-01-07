@@ -6,10 +6,10 @@ using System.Runtime.CompilerServices;
 public class VoxelChunk : MonoBehaviour
 {
     // Number of blocks in a single dimension of a chunk
-    public const int CHUNK_SIZE = 24;
-    public const float CHUNK_WORLD_SIZE = CHUNK_SIZE * VoxelBlock.WORLD_SIZE;
+    public const int MAX_BLOCK_EDGE_SIZE = 24;
+    public const float CHUNK_WORLD_SIZE = MAX_BLOCK_EDGE_SIZE * VoxelBlock.WORLD_SIZE;
 
-    private const int MAX_BLOCK_COUNT = CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE;
+    private const int MAX_BLOCK_COUNT = MAX_BLOCK_EDGE_SIZE * MAX_BLOCK_EDGE_SIZE * MAX_BLOCK_EDGE_SIZE;
 
     [SerializeField] private MeshFilter _meshFilter;
     [SerializeField] private MeshRenderer _meshRenderer;
@@ -101,18 +101,18 @@ public class VoxelChunk : MonoBehaviour
             VoxelMeshUtility.BeginNewMesh();
 
             // Global block locations of this chunk and (x + 1, y + 1, z + 1) chunk
-            Vector3Int thisMinBlockLoc = _location * CHUNK_SIZE;
-            Vector3Int nextMinBlockLoc = (_location + Vector3Int.one) * CHUNK_SIZE;
+            Vector3Int thisMinBlockLoc = _location * MAX_BLOCK_EDGE_SIZE;
+            Vector3Int nextMinBlockLoc = (_location + Vector3Int.one) * MAX_BLOCK_EDGE_SIZE;
 
-            for (int z = 0; z < CHUNK_SIZE; z++)
+            for (int z = 0; z < MAX_BLOCK_EDGE_SIZE; z++)
             {
-                int zIndexOffs = z * CHUNK_SIZE * CHUNK_SIZE;
+                int zIndexOffs = z * MAX_BLOCK_EDGE_SIZE * MAX_BLOCK_EDGE_SIZE;
 
-                for (int y = 0; y < CHUNK_SIZE; y++)
+                for (int y = 0; y < MAX_BLOCK_EDGE_SIZE; y++)
                 {
-                    int yIndexOffs = y * CHUNK_SIZE;
+                    int yIndexOffs = y * MAX_BLOCK_EDGE_SIZE;
 
-                    for (int x = 0; x < CHUNK_SIZE; x++)
+                    for (int x = 0; x < MAX_BLOCK_EDGE_SIZE; x++)
                     {
                         int mainBlockIndex = zIndexOffs + yIndexOffs + x;
                         VoxelBlock targetBlock = _blocks[mainBlockIndex];
@@ -124,13 +124,13 @@ public class VoxelChunk : MonoBehaviour
                             {
                                 VoxelMeshUtility.AddQuad(x, y, z, VoxelMeshUtility.Face.Left, targetBlock.material);
                             }
-                            if ((x == CHUNK_SIZE - 1 && _voxelObj.GetBlock(nextMinBlockLoc.x, thisMinBlockLoc.y + y, thisMinBlockLoc.z + z).material == VoxelBlock.Material.Empty) ||
-                                (x != CHUNK_SIZE - 1 && _blocks[GetBlockIndex(x + 1, y, z)].material == VoxelBlock.Material.Empty))
+                            if ((x == MAX_BLOCK_EDGE_SIZE - 1 && _voxelObj.GetBlock(nextMinBlockLoc.x, thisMinBlockLoc.y + y, thisMinBlockLoc.z + z).material == VoxelBlock.Material.Empty) ||
+                                (x != MAX_BLOCK_EDGE_SIZE - 1 && _blocks[GetBlockIndex(x + 1, y, z)].material == VoxelBlock.Material.Empty))
                             {
                                 VoxelMeshUtility.AddQuad(x, y, z, VoxelMeshUtility.Face.Right, targetBlock.material);
                             }
-                            if ((y == CHUNK_SIZE - 1 && _voxelObj.GetBlock(thisMinBlockLoc.x + x, nextMinBlockLoc.y, thisMinBlockLoc.z + z).material == VoxelBlock.Material.Empty) ||
-                                (y != CHUNK_SIZE - 1 && _blocks[GetBlockIndex(x, y + 1, z)].material == VoxelBlock.Material.Empty))
+                            if ((y == MAX_BLOCK_EDGE_SIZE - 1 && _voxelObj.GetBlock(thisMinBlockLoc.x + x, nextMinBlockLoc.y, thisMinBlockLoc.z + z).material == VoxelBlock.Material.Empty) ||
+                                (y != MAX_BLOCK_EDGE_SIZE - 1 && _blocks[GetBlockIndex(x, y + 1, z)].material == VoxelBlock.Material.Empty))
                             {
                                 VoxelMeshUtility.AddQuad(x, y, z, VoxelMeshUtility.Face.Up, targetBlock.material);
                             }
@@ -139,8 +139,8 @@ public class VoxelChunk : MonoBehaviour
                             {
                                 VoxelMeshUtility.AddQuad(x, y, z, VoxelMeshUtility.Face.Down, targetBlock.material);
                             }
-                            if ((z == CHUNK_SIZE - 1 && _voxelObj.GetBlock(thisMinBlockLoc.x + x, thisMinBlockLoc.y + y, nextMinBlockLoc.z).material == VoxelBlock.Material.Empty) ||
-                                (z != CHUNK_SIZE - 1 && _blocks[GetBlockIndex(x, y, z + 1)].material == VoxelBlock.Material.Empty))
+                            if ((z == MAX_BLOCK_EDGE_SIZE - 1 && _voxelObj.GetBlock(thisMinBlockLoc.x + x, thisMinBlockLoc.y + y, nextMinBlockLoc.z).material == VoxelBlock.Material.Empty) ||
+                                (z != MAX_BLOCK_EDGE_SIZE - 1 && _blocks[GetBlockIndex(x, y, z + 1)].material == VoxelBlock.Material.Empty))
                             {
                                 VoxelMeshUtility.AddQuad(x, y, z, VoxelMeshUtility.Face.Forward, targetBlock.material);
                             }
@@ -174,6 +174,6 @@ public class VoxelChunk : MonoBehaviour
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int GetBlockIndex(int x, int y, int z)
     {
-        return (z * CHUNK_SIZE * CHUNK_SIZE) + (y * CHUNK_SIZE) + x;
+        return (z * MAX_BLOCK_EDGE_SIZE * MAX_BLOCK_EDGE_SIZE) + (y * MAX_BLOCK_EDGE_SIZE) + x;
     }
 }
